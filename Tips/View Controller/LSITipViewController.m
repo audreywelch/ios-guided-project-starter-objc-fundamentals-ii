@@ -16,6 +16,10 @@
 @interface LSITipViewController () <UITableViewDelegate, UITableViewDataSource>
 
 // Private Properties
+@property (nonatomic) double total;
+@property (nonatomic) int split;
+@property (nonatomic) double percentage;
+@property (nonatomic) double tip;
 
 // Private IBOutlets
 @property (strong, nonatomic) IBOutlet UITextField *totalTextField;
@@ -68,12 +72,29 @@
     return _tipController;
 }
 
+// Calculate the tip using the values from the UI
 - (void)calculateTip {
-    // TODO: Calculate the tip using the values from the UI
+    self.percentage = round(self.percentageSlider.value);
+    self.total = [self.totalTextField.text doubleValue];
+    self.split = self.splitStepper.value;
+    
+    self.tip = self.total * (self.percentage / 100.0) / self.split;
+    
+    [self updateViews];
 }
 
 - (void)updateViews {
     // TODO: Use the model data to update the views
+    
+    self.splitStepper.value = self.split;
+    self.percentageSlider.value = self.percentage;
+    self.totalTextField.text = [NSString stringWithFormat:@"%.2f", self.total];
+    
+    self.tipLabel.text = [NSString stringWithFormat:@"$%.2f", self.tip];
+    self.splitLabel.text = [NSString stringWithFormat:@"%d", self.split];
+    
+    // %% = % for output
+    self.percentageLabel.text = [NSString stringWithFormat:@"%0.0f%%", self.percentage];
 }
 
 - (void)saveTipNamed:(NSString *)name {
@@ -84,9 +105,19 @@
 
 // MARK: - IBActions
 
+- (IBAction)splitChanged:(UIStepper *)sender {
+    self.split = round(self.splitStepper.value);
+    [self calculateTip];
+}
 
-// TODO: Connect actions for splitChanged, sliderChanged, and Save Tip button
+- (IBAction)sliderChanged:(UISlider *)sender {
+    self.percentage = round(self.percentageSlider.value);
+    [self calculateTip];
+}
 
+- (IBAction)saveTipButtonPressed:(UIButton *)sender {
+    [self showSaveTipAlert];
+}
 
 // MARK: - UITableViewDataSource
 

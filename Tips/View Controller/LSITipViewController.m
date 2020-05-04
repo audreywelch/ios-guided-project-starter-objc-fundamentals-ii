@@ -8,12 +8,24 @@
 
 #import "LSITipViewController.h"
 #import "LSITip.h" // ONLY IMPORT .H FILES!
+#import "LSITipController.h"
 
-@interface LSITipViewController ()
+// Class Extension
+
+// Conform to delegate protocols in the .m file using the Class Extension
+@interface LSITipViewController () <UITableViewDelegate, UITableViewDataSource>
 
 // Private Properties
 
 // Private IBOutlets
+@property (strong, nonatomic) IBOutlet UITextField *totalTextField;
+@property (strong, nonatomic) IBOutlet UILabel *splitLabel;
+@property (strong, nonatomic) IBOutlet UILabel *tipLabel;
+@property (strong, nonatomic) IBOutlet UILabel *percentageLabel;
+@property (strong, nonatomic) IBOutlet UIStepper *splitStepper;
+@property (strong, nonatomic) IBOutlet UISlider *percentageSlider;
+@property (strong, nonatomic) IBOutlet UITableView *tableView;
+
 
 // Private Methods
 
@@ -23,6 +35,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
     
     LSITip *tip = [[LSITip alloc] initWithTotal:84.45 splitCount:2 tipPercentage:20 name:@"Brick oven pizza"];
     
@@ -38,7 +53,19 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    // [self showSaveTipAlert];
+    [super viewDidAppear:animated];
+    
+}
+
+// Lazy Property (getter)
+- (LSITipController *)tipController {
+    // if true, initialize it
+    if (!_tipController) { // if _tipController != nil {
+        _tipController = [[LSITipController alloc] init];
+    }
+    
+    // return instance variable/object
+    return _tipController;
 }
 
 - (void)calculateTip {
@@ -63,11 +90,21 @@
 
 // MARK: - UITableViewDataSource
 
-//- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-//}
-//
-//- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-//}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    return self.tipController.tips.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TipCell" forIndexPath:indexPath];
+    
+    LSITip *tip = self.tipController.tips[indexPath.row];
+    
+    cell.textLabel.text = tip.name;
+    
+    return cell;
+}
 
 // MARK: - UITableViewDelegate
 
